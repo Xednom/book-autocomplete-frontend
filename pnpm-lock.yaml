@@ -9,13 +9,13 @@ importers:
   .:
     dependencies:
       '@nuxt/devtools':
-        specifier: ^1.0.6
+        specifier: ^1.6.0
         version: 1.6.0(rollup@4.24.4)(vite@5.4.10(@types/node@22.9.0)(sass@1.80.6)(terser@5.36.0))(vue@3.5.12(typescript@5.6.3))(webpack-sources@3.2.3)
       '@pinia/nuxt':
-        specifier: ^0.5.1
+        specifier: ^0.5.5
         version: 0.5.5(magicast@0.3.5)(rollup@4.24.4)(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3))(webpack-sources@3.2.3)
       '@vuepic/vue-datepicker':
-        specifier: ^8.6.0
+        specifier: ^8.8.1
         version: 8.8.1(vue@3.5.12(typescript@5.6.3))
       chart.js:
         specifier: 3.3.2
@@ -24,32 +24,32 @@ importers:
         specifier: ^2.30.1
         version: 2.30.1
       pinia:
-        specifier: ^2.1.7
+        specifier: ^2.2.6
         version: 2.2.6(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3))
       primeflex:
-        specifier: ^3.3.0
+        specifier: ^3.3.1
         version: 3.3.1
       primeicons:
         specifier: ^6.0.1
         version: 6.0.1
       primevue:
-        specifier: ^3.52.0
+        specifier: ^3.53.0
         version: 3.53.0(vue@3.5.12(typescript@5.6.3))
       vercel-submodules:
         specifier: ^1.0.10
         version: 1.0.10
     devDependencies:
       '@babel/eslint-parser':
-        specifier: ^7.18.9
+        specifier: ^7.25.9
         version: 7.25.9(@babel/core@7.26.0)(eslint@8.57.1)
       '@sidebase/nuxt-auth':
-        specifier: ^0.6.3
+        specifier: ^0.6.7
         version: 0.6.7(magicast@0.3.5)(next-auth@4.24.10(next@15.0.2(@babel/core@7.26.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.80.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(rollup@4.24.4)(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3))(webpack-sources@3.2.3)
       eslint:
-        specifier: ^8.30.0
+        specifier: ^8.57.1
         version: 8.57.1
       eslint-config-prettier:
-        specifier: ^8.5.0
+        specifier: ^8.10.0
         version: 8.10.0(eslint@8.57.1)
       eslint-plugin-nuxt:
         specifier: ^4.0.0
@@ -58,10 +58,10 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1(eslint-config-prettier@8.10.0(eslint@8.57.1))(eslint@8.57.1)(prettier@2.7.1)
       eslint-plugin-vue:
-        specifier: ^9.4.0
+        specifier: ^9.30.0
         version: 9.30.0(eslint@8.57.1)
       nuxt:
-        specifier: ^3.11.2
+        specifier: ^3.14.159
         version: 3.14.159(@parcel/watcher@2.5.0)(@types/node@22.9.0)(eslint@8.57.1)(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.24.4)(sass@1.80.6)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.10(@types/node@22.9.0)(sass@1.80.6)(terser@5.36.0))(webpack-sources@3.2.3)
       nuxt-primevue:
         specifier: ^0.1.0
@@ -70,10 +70,10 @@ importers:
         specifier: 2.7.1
         version: 2.7.1
       sass:
-        specifier: ^1.60.0
+        specifier: ^1.80.6
         version: 1.80.6
       sass-loader:
-        specifier: ^10.4.1
+        specifier: ^10.5.2
         version: 10.5.2(sass@1.80.6)(webpack@5.96.1)
 
 packages:

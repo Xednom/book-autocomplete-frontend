@@ -15,29 +15,29 @@
         "format:check": "prettier --check \"**/*.{js,vue,d.ts}\""
     },
     "dependencies": {
-        "@nuxt/devtools": "^1.0.6",
-        "@pinia/nuxt": "^0.5.1",
-        "@vuepic/vue-datepicker": "^8.6.0",
+        "@nuxt/devtools": "^1.6.0",
+        "@pinia/nuxt": "^0.5.5",
+        "@vuepic/vue-datepicker": "^8.8.1",
         "chart.js": "3.3.2",
         "moment": "^2.30.1",
-        "pinia": "^2.1.7",
-        "primeflex": "^3.3.0",
+        "pinia": "^2.2.6",
+        "primeflex": "^3.3.1",
         "primeicons": "^6.0.1",
-        "primevue": "^3.52.0",
+        "primevue": "^3.53.0",
         "vercel-submodules": "^1.0.10"
     },
     "devDependencies": {
-        "@babel/eslint-parser": "^7.18.9",
-        "@sidebase/nuxt-auth": "^0.6.3",
-        "eslint": "^8.30.0",
-        "eslint-config-prettier": "^8.5.0",
+        "@babel/eslint-parser": "^7.25.9",
+        "@sidebase/nuxt-auth": "^0.6.7",
+        "eslint": "^8.57.1",
+        "eslint-config-prettier": "^8.10.0",
         "eslint-plugin-nuxt": "^4.0.0",
         "eslint-plugin-prettier": "^4.2.1",
-        "eslint-plugin-vue": "^9.4.0",
-        "nuxt": "^3.11.2",
+        "eslint-plugin-vue": "^9.30.0",
+        "nuxt": "^3.14.159",
         "nuxt-primevue": "^0.1.0",
         "prettier": "2.7.1",
-        "sass": "^1.60.0",
-        "sass-loader": "^10.4.1"
+        "sass": "^1.80.6",
+        "sass-loader": "^10.5.2"
     }
 }
