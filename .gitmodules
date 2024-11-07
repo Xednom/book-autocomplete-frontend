@@ -1,0 +1,12 @@
+[submodule "vue-bvgels"]
+	path = vue-bvgels
+	url = git@github.com:Xednom/vue-bvgels.git
+[submodule ".assets/layout/styles/bvgels-theme"]
+	path = .assets/layout/styles/bvgels-theme
+	url = git@github.com:Xednom/bvgels-nuxt-theme.git
+[submodule "theme"]
+	path = theme
+	url = git@github.com:Xednom/bvgels-nuxt-theme.git
+[submodule "bvgels-theme"]
+	path = bvgels-theme
+	url = git@github.com:Xednom/bvgels-nuxt-theme.git
