@@ -10,6 +10,13 @@ const { isDarkTheme } = useLayout();
 // definePageMeta({
 //     middleware: 'auth'
 // });
+
+interface TodoItem {
+    description: string;
+    book: string;
+    done: boolean;
+    editing?: boolean;
+}
 const products = ref(null);
 
 const countries = ref();
@@ -17,9 +24,17 @@ const filteredBooks = ref([]);
 const books = ref([]);
 
 const selectedBook = ref();
-const todoList = ref([]);
+
+const todoList = ref<TodoItem[]>([
+    { description: 'Read chapter 1', book: 'Book A', done: false, editing: false },
+    { description: 'Review notes', book: 'Book B', done: true, editing: false }
+]);
 const lineOptions = ref(null);
 const striked = ref(false);
+const columns = ref([
+    { field: 'description', header: 'Description' },
+    { field: 'book', header: 'Book' }
+]);
 
 onMounted(() => {
     ProductService.getProductsSmall().then((data) => (products.value = data));
@@ -98,6 +113,14 @@ const removeTodo = (index) => {
 
 const strikeTodo = (index: number) => {
     todoList.value[index].done = !todoList.value[index].done;
+};
+
+const startEditing = (todo: TodoItem) => {
+    todo.editing = true;
+};
+
+const stopEditing = (todo: TodoItem) => {
+    todo.editing = false;
 };
 
 const applyLightTheme = () => {
@@ -194,16 +217,22 @@ watch(
                 </div>
                 <div class="card mt-3">
                     <h5>To-Do List</h5>
-                    <ul>
-                        <li v-for="(todo, index) in todoList" :key="index">
-                            <div>
-                                <span v-if="todo.done" class="pr-2"
-                                    ><strike>{{ todo.description }} {{ todo.book }}</strike></span
-                                >
-                                <span v-else class="pr-2">{{ todo.description }} {{ todo.book }}</span>
-                                <Button v-if="!todo.done" @click="strikeTodo(index)" class="small-button" label="Done" severity="warning" size="small" aria-label="Done" rounded />
-                                <Button v-else-if="todo.done" @click="strikeTodo(index)" class="small-button" label="Reopen" severity="warning" size="small" aria-label="Reopen" rounded />
-                                <Button @click="removeTodo(index)" class="small-button" label="Remove" severity="danger" size="small" aria-label="Remove" rounded />
+                    <ul class="todo-list">
+                        <li v-for="(todo, index) in todoList" :key="index" class="todo-item">
+                            <div class="todo-content">
+                                <span v-if="!todo.editing">
+                                    <span v-if="todo.done" class="todo-text" @click="startEditing(todo)">
+                                        <strike>{{ todo.description }} - {{ todo.book }}</strike>
+                                    </span>
+                                    <span v-else class="todo-text" @click="startEditing(todo)"> {{ todo.description }} - {{ todo.book }} </span>
+                                </span>
+                                <InputText v-else v-model="todo.description" class="edit-input" @keyup.enter="stopEditing(todo)" @blur="stopEditing(todo)" />
+
+                                <div class="button-group">
+                                    <Button v-if="!todo.done" @click="strikeTodo(index)" class="small-button" label="Done" severity="warning" size="small" aria-label="Done" rounded />
+                                    <Button v-else-if="todo.done" @click="strikeTodo(index)" class="small-button" label="Reopen" severity="info" size="small" aria-label="Reopen" rounded />
+                                    <Button @click="removeTodo(index)" class="small-button" label="Remove" severity="danger" size="small" aria-label="Remove" rounded />
+                                </div>
                             </div>
                         </li>
                     </ul>
@@ -219,5 +248,46 @@ watch(
     font-size: 0.8rem; /* Adjust font size if needed */
     border-radius: 8px; /* Customize border radius */
     max-width: 70px;
+}
+
+.card {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.todo-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.todo-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.todo-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+.todo-text {
+    cursor: pointer;
+}
+
+.button-group {
+    display: flex;
+    gap: 5px;
+}
+
+.edit-input {
+    width: 100%;
 }
 </style>
