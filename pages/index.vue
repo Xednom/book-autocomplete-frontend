@@ -3,39 +3,20 @@ import { useLayout } from '@/layouts/composables/layout';
 import { ProductService } from '@/service/ProductService';
 import { CountryService } from '@/service/CountryService';
 import { onMounted, reactive, ref, watch } from 'vue';
+import { useFuse } from '@vueuse/integrations/useFuse';
+
 const { isDarkTheme } = useLayout();
 // definePageMeta({
 //     middleware: 'auth'
 // });
 const products = ref(null);
-const lineData = reactive({
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-    datasets: [
-        {
-            label: 'First Dataset',
-            data: [65, 59, 80, 81, 56, 55, 40],
-            fill: false,
-            backgroundColor: '#2f4860',
-            borderColor: '#2f4860',
-            tension: 0.4
-        },
-        {
-            label: 'Second Dataset',
-            data: [28, 48, 40, 19, 86, 27, 90],
-            fill: false,
-            backgroundColor: '#00bb7e',
-            borderColor: '#00bb7e',
-            tension: 0.4
-        }
-    ]
-});
+
 const countries = ref();
 const filteredBooks = ref([]);
 const books = ref([]);
 
-const filteredCountries = ref();
-const selectedCountry = ref();
 const selectedBook = ref();
+const todoList = ref([]);
 const items = ref([
     { label: 'Add New', icon: 'pi pi-fw pi-plus' },
     { label: 'Remove', icon: 'pi pi-fw pi-minus' }
@@ -47,53 +28,83 @@ onMounted(() => {
     CountryService.getCountries().then((data) => (countries.value = data));
 });
 
-const formatCurrency = (value) => {
-    return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-};
+const exactMatch = ref(false);
+const isCaseSensitive = ref(false);
+const matchAllWhenSearchEmpty = ref(true);
 
-const searchCountry = (event) => {
-    console.log('event: ', event.query);
-    setTimeout(() => {
-        if (!event.query.trim().length) {
-            filteredCountries.value = [...countries.value];
-        } else {
-            filteredCountries.value = countries.value.filter((country) => {
-                return country.name.toLowerCase().startsWith(event.query.toLowerCase());
-            });
-        }
-    }, 250);
-};
+const options = computed<UseFuseOptions<DataItem>>(() => ({
+    fuseOptions: {
+        keys: ['title'],
+        isCaseSensitive: isCaseSensitive.value,
+        threshold: 0.4
+    },
+    // resultLimit: resultLimit.value,
+    matchAllWhenSearchEmpty: matchAllWhenSearchEmpty.value
+}));
+
+const { results } = useFuse(books, options);
 
 const searchBooks = (event) => {
-    const query = event.query.trim();
-    console.log('event: ', event);
+    const query = event.query.trim().toLowerCase();
+
+    console.info('selectedBook and query: ', selectedBook, query);
 
     if (!query.length) {
         filteredBooks.value = [...books.value];
     } else {
         setTimeout(async () => {
             try {
-                const response = await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(query)}`);
-                console.log('Response: ', response);
+                const response = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}`);
                 if (response.ok) {
                     const data = await response.json();
 
-                    filteredBooks.value = data.docs.map((book) => ({
-                        title: book.title || 'Unknown Title',
-                        author: book.author_name ? book.author_name.join(', ') : 'Unknown Author',
-                        year: book.first_publish_year || 'Unknown Year',
-                        lccn: book.lccn || 'Unknown LCCN',
-                        oclc: book.oclc || 'Unknown OCLC'
-                    }));
+                    // Filter and map results to prioritize exact or popular titles
+                    filteredBooks.value = data.docs
+                        .filter((book) => book.title && book.title.toLowerCase().includes(query)) // Filter by query match
+                        .map((book) => ({
+                            title: book.title || 'Unknown Title',
+                            author: book.author_name ? book.author_name.join(', ') : 'Unknown Author',
+                            year: book.first_publish_year || 'Unknown Year',
+                            lccn: book.lccn || 'Unknown LCCN',
+                            oclc: book.oclc || 'Unknown OCLC'
+                        }));
+
+                    // Save the results for display
                     books.value = filteredBooks.value;
+                    console.warn('filteredBooks: ', filteredBooks.value);
+                    console.warn('Type of selectedBook: ', typeof selectedBook.value == 'object');
+                    if (typeof selectedBook.value == 'object' && selectedBook.value != null) {
+                        addTodo();
+                    }
                 } else {
                     console.error('Error fetching books:', response.statusText);
                 }
             } catch (error) {
                 console.error('Error fetching books:', error);
             }
-        }, 250);
+        }, 3000);
     }
+};
+
+const addBookTodo = () => {
+    if (selectedBook.value & !todoList.find((book) => book.title == selectedBook.value.title)) {
+        todoList.push(...selectedBook.value);
+        selectedBook.value = null; // clear selection after adding
+    }
+};
+
+// Add todo item when Enter is pressed
+const addTodo = () => {
+    if (typeof selectedBook.value === 'object' && selectedBook.value != null) {
+        todoList.value.push({
+            description: 'read later',
+            book: selectedBook.value ? { ...selectedBook.value } : null
+        });
+    }
+
+    // Clear input fields after adding
+
+    selectedBook.value = null;
 };
 
 const applyLightTheme = () => {
@@ -155,6 +166,11 @@ const applyDarkTheme = () => {
         }
     };
 };
+watch(selectedBook, (val) => {
+    if (typeof selectedBook.value === 'object') {
+        addTodo();
+    }
+});
 
 watch(
     isDarkTheme,
@@ -175,7 +191,21 @@ watch(
             <div class="col-12 md:col-12 lg:col-12">
                 <div class="card mb-0">
                     <h5>Search a book</h5>
-                    <AutoComplete v-model="selectedBook" optionLabel="title" :suggestions="filteredBooks" @complete="searchBooks" class="w-full" dropdown />
+                    <AutoComplete v-model="selectedBook" optionLabel="title" :suggestions="filteredBooks" @complete="searchBooks" class="w-full" dropdown>
+                        <template #option="slotProps">
+                            <div class="flex align-options-center">
+                                <div>{{ slotProps.option.title }} - {{ slotProps.option.author }}</div>
+                            </div>
+                        </template>
+                    </AutoComplete>
+                </div>
+                <div class="card mt-3">
+                    <h5>To-Do List</h5>
+                    <ul>
+                        <li v-for="(todo, index) in todoList" :key="index">
+                            <span v-if="todo.book">{{ todo.description }} {{ todo.book.title }}</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
