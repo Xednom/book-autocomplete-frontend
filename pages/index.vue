@@ -4,6 +4,7 @@ import { ProductService } from '@/service/ProductService';
 import { CountryService } from '@/service/CountryService';
 import { onMounted, reactive, ref, watch } from 'vue';
 import { useFuse } from '@vueuse/integrations/useFuse';
+import { useAnonApiCrud } from '@/src/vue-bvgels/composables/useAnonApiCrud';
 
 const { isDarkTheme } = useLayout();
 // definePageMeta({
@@ -17,18 +18,16 @@ const books = ref([]);
 
 const selectedBook = ref();
 const todoList = ref([]);
-const items = ref([
-    { label: 'Add New', icon: 'pi pi-fw pi-plus' },
-    { label: 'Remove', icon: 'pi pi-fw pi-minus' }
-]);
 const lineOptions = ref(null);
+const striked = ref(false);
 
 onMounted(() => {
     ProductService.getProductsSmall().then((data) => (products.value = data));
     CountryService.getCountries().then((data) => (countries.value = data));
 });
 
-const exactMatch = ref(false);
+const { save, fetchItem, item, saving, loading, serverError } = useAnonApiCrud('todo');
+
 const isCaseSensitive = ref(false);
 const matchAllWhenSearchEmpty = ref(true);
 
@@ -45,66 +44,60 @@ const options = computed<UseFuseOptions<DataItem>>(() => ({
 const { results } = useFuse(books, options);
 
 const searchBooks = (event) => {
-    const query = event.query.trim().toLowerCase();
-
-    console.info('selectedBook and query: ', selectedBook, query);
+    const query = event.query.trim();
+    console.log('event: ', event);
 
     if (!query.length) {
         filteredBooks.value = [...books.value];
     } else {
         setTimeout(async () => {
             try {
-                const response = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}`);
+                const response = await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(query)}`);
+                console.log('Response: ', response);
                 if (response.ok) {
                     const data = await response.json();
 
-                    // Filter and map results to prioritize exact or popular titles
-                    filteredBooks.value = data.docs
-                        .filter((book) => book.title && book.title.toLowerCase().includes(query)) // Filter by query match
-                        .map((book) => ({
-                            title: book.title || 'Unknown Title',
-                            author: book.author_name ? book.author_name.join(', ') : 'Unknown Author',
-                            year: book.first_publish_year || 'Unknown Year',
-                            lccn: book.lccn || 'Unknown LCCN',
-                            oclc: book.oclc || 'Unknown OCLC'
-                        }));
-
-                    // Save the results for display
+                    filteredBooks.value = data.docs.map((book) => ({
+                        title: book.title || 'Unknown Title',
+                        author: book.author_name ? book.author_name.join(', ') : 'Unknown Author',
+                        year: book.first_publish_year || 'Unknown Year'
+                        // lccn: book.lccn || 'Unknown LCCN',
+                        // oclc: book.oclc || 'Unknown OCLC'
+                    }));
                     books.value = filteredBooks.value;
-                    console.warn('filteredBooks: ', filteredBooks.value);
-                    console.warn('Type of selectedBook: ', typeof selectedBook.value == 'object');
-                    if (typeof selectedBook.value == 'object' && selectedBook.value != null) {
-                        addTodo();
-                    }
                 } else {
                     console.error('Error fetching books:', response.statusText);
                 }
             } catch (error) {
                 console.error('Error fetching books:', error);
             }
-        }, 3000);
-    }
-};
-
-const addBookTodo = () => {
-    if (selectedBook.value & !todoList.find((book) => book.title == selectedBook.value.title)) {
-        todoList.push(...selectedBook.value);
-        selectedBook.value = null; // clear selection after adding
+        }, 250);
     }
 };
 
 // Add todo item when Enter is pressed
 const addTodo = () => {
     if (typeof selectedBook.value === 'object' && selectedBook.value != null) {
+        console.log('selectedBook.value ? selectedBook.value.title : null: ', selectedBook.value.title);
         todoList.value.push({
             description: 'read later',
-            book: selectedBook.value ? { ...selectedBook.value } : null
+            book: selectedBook.value.title,
+            done: false
         });
+        // save(...todoList.value);
     }
 
     // Clear input fields after adding
 
     selectedBook.value = null;
+};
+
+const removeTodo = (index) => {
+    todoList.value.splice(index, 1);
+};
+
+const strikeTodo = (index: number) => {
+    todoList.value[index].done = !todoList.value[index].done;
 };
 
 const applyLightTheme = () => {
@@ -186,9 +179,9 @@ watch(
 </script>
 
 <template>
-    <div class="flex justify-content-center align-items-center">
+    <div class="container">
         <div class="grid p-fluid">
-            <div class="col-12 md:col-12 lg:col-12">
+            <div class="col-12">
                 <div class="card mb-0">
                     <h5>Search a book</h5>
                     <AutoComplete v-model="selectedBook" optionLabel="title" :suggestions="filteredBooks" @complete="searchBooks" class="w-full" dropdown>
@@ -203,7 +196,15 @@ watch(
                     <h5>To-Do List</h5>
                     <ul>
                         <li v-for="(todo, index) in todoList" :key="index">
-                            <span v-if="todo.book">{{ todo.description }} {{ todo.book.title }}</span>
+                            <div>
+                                <span v-if="todo.done" class="pr-2"
+                                    ><strike>{{ todo.description }} {{ todo.book }}</strike></span
+                                >
+                                <span v-else class="pr-2">{{ todo.description }} {{ todo.book }}</span>
+                                <Button v-if="!todo.done" @click="strikeTodo(index)" class="small-button" label="Done" severity="warning" size="small" aria-label="Done" rounded />
+                                <Button v-else-if="todo.done" @click="strikeTodo(index)" class="small-button" label="Reopen" severity="warning" size="small" aria-label="Reopen" rounded />
+                                <Button @click="removeTodo(index)" class="small-button" label="Remove" severity="danger" size="small" aria-label="Remove" rounded />
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -211,3 +212,12 @@ watch(
         </div>
     </div>
 </template>
+
+<style scoped>
+.small-button {
+    padding: 0.25rem 0.5rem; /* Adjust padding for smaller size */
+    font-size: 0.8rem; /* Adjust font size if needed */
+    border-radius: 8px; /* Customize border radius */
+    max-width: 70px;
+}
+</style>
