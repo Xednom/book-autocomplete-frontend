@@ -3,7 +3,7 @@ export function useNavigationMenu() {
         return [
             {
                 label: 'Home',
-                items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
+                items: [{ label: 'Library', icon: 'pi pi-fw pi-home', to: '/' }]
             },
         ]
     };
