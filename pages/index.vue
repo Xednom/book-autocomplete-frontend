@@ -1,15 +1,18 @@
 <script setup lang="ts">
+import { FilterMatchMode, FilterOperator } from 'primevue/api';
+
 import { useLayout } from '@/layouts/composables/layout';
 import { ProductService } from '@/service/ProductService';
 import { CountryService } from '@/service/CountryService';
 import { onMounted, reactive, ref, watch } from 'vue';
 import { useFuse } from '@vueuse/integrations/useFuse';
-import { useAnonApiCrud } from '@/src/vue-bvgels/composables/useAnonApiCrud';
+import { useApiCrud } from '@/src/vue-bvgels/composables/useApiCrud';
+import { usePaginatedFetch } from '@/src/vue-bvgels/composables/usePaginatedFetch';
 
 const { isDarkTheme } = useLayout();
-// definePageMeta({
-//     middleware: 'auth'
-// });
+definePageMeta({
+    middleware: 'auth'
+});
 
 interface TodoItem {
     description: string;
@@ -17,31 +20,31 @@ interface TodoItem {
     done: boolean;
     editing?: boolean;
 }
+
+const filters = ref({
+    description: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    book: { value: '', matchMode: FilterMatchMode.CONTAINS }
+});
+
+const { transformedData, first, rows, totalRecords, loading, fetchItems, onPageChange } = usePaginatedFetch('todo', filters);
+
+const { data } = useAuth();
 const products = ref(null);
 
 const countries = ref();
 const filteredBooks = ref([]);
 const books = ref([]);
 
+const todoDescription = ref('');
 const selectedBook = ref();
 
-const todoList = ref<TodoItem[]>([
-    { description: 'Read chapter 1', book: 'Book A', done: false, editing: false },
-    { description: 'Review notes', book: 'Book B', done: true, editing: false }
-]);
 const lineOptions = ref(null);
-const striked = ref(false);
-const columns = ref([
-    { field: 'description', header: 'Description' },
-    { field: 'book', header: 'Book' }
-]);
-
 onMounted(() => {
     ProductService.getProductsSmall().then((data) => (products.value = data));
     CountryService.getCountries().then((data) => (countries.value = data));
 });
 
-const { save, fetchItem, item, saving, loading, serverError } = useAnonApiCrud('todo');
+const { save, fetchItem, item, saving, serverError } = useApiCrud('todo');
 
 const isCaseSensitive = ref(false);
 const matchAllWhenSearchEmpty = ref(true);
@@ -60,7 +63,6 @@ const { results } = useFuse(books, options);
 
 const searchBooks = (event) => {
     const query = event.query.trim();
-    console.log('event: ', event);
 
     if (!query.length) {
         filteredBooks.value = [...books.value];
@@ -68,7 +70,6 @@ const searchBooks = (event) => {
         setTimeout(async () => {
             try {
                 const response = await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(query)}`);
-                console.log('Response: ', response);
                 if (response.ok) {
                     const data = await response.json();
 
@@ -91,28 +92,36 @@ const searchBooks = (event) => {
 };
 
 // Add todo item when Enter is pressed
-const addTodo = () => {
-    if (typeof selectedBook.value === 'object' && selectedBook.value != null) {
-        console.log('selectedBook.value ? selectedBook.value.title : null: ', selectedBook.value.title);
-        todoList.value.push({
-            description: 'read later',
+const addTodo = async () => {
+    if (todoDescription.value.trim() && selectedBook.value) {
+        const newTodo = {
+            description: todoDescription.value,
             book: selectedBook.value.title,
-            done: false
-        });
-        // save(...todoList.value);
+            done: false,
+            user: data.value.id
+        };
+
+        try {
+            await save(newTodo, false);
+            await fetchItems();
+        } catch (err) {
+            console.error('err saving todo: ', err);
+        }
     }
 
     // Clear input fields after adding
-
+    todoDescription.value = '';
     selectedBook.value = null;
 };
 
-const removeTodo = (index) => {
-    todoList.value.splice(index, 1);
+const removeTodo = (index: number, item: object) => {
+    transformedData.value.splice(index, 1);
+    save(item);
 };
 
-const strikeTodo = (index: number) => {
-    todoList.value[index].done = !todoList.value[index].done;
+const strikeTodo = (index: number, item: object) => {
+    transformedData.value[index].done = !transformedData.value[index].done;
+    save(item);
 };
 
 const startEditing = (todo: TodoItem) => {
@@ -182,11 +191,6 @@ const applyDarkTheme = () => {
         }
     };
 };
-watch(selectedBook, (val) => {
-    if (typeof selectedBook.value === 'object') {
-        addTodo();
-    }
-});
 
 watch(
     isDarkTheme,
@@ -215,23 +219,24 @@ watch(
                         </template>
                     </AutoComplete>
                 </div>
+                <div class="card mt-2">
+                    <h5>Enter your Todo</h5>
+                    <InputText v-model="todoDescription" placeholder="Describe your todo..." class="w-full" @keyup.enter="addTodo" />
+                </div>
                 <div class="card mt-3">
                     <h5>To-Do List</h5>
                     <ul class="todo-list">
-                        <li v-for="(todo, index) in todoList" :key="index" class="todo-item">
+                        <li v-for="(todo, index) in transformedData" :key="todo.id" class="todo-item">
                             <div class="todo-content">
-                                <span v-if="!todo.editing">
-                                    <span v-if="todo.done" class="todo-text" @click="startEditing(todo)">
-                                        <strike>{{ todo.description }} - {{ todo.book }}</strike>
-                                    </span>
-                                    <span v-else class="todo-text" @click="startEditing(todo)"> {{ todo.description }} - {{ todo.book }} </span>
+                                <span v-if="todo.done">
+                                    <strike>{{ todo.description }} {{ todo.book }}</strike>
                                 </span>
-                                <InputText v-else v-model="todo.description" class="edit-input" @keyup.enter="stopEditing(todo)" @blur="stopEditing(todo)" />
-
+                                <span v-else>{{ todo.description }} {{ todo.book }}</span>
+                                <!-- Button Group on the Right Side -->
                                 <div class="button-group">
-                                    <Button v-if="!todo.done" @click="strikeTodo(index)" class="small-button" label="Done" severity="warning" size="small" aria-label="Done" rounded />
-                                    <Button v-else-if="todo.done" @click="strikeTodo(index)" class="small-button" label="Reopen" severity="info" size="small" aria-label="Reopen" rounded />
-                                    <Button @click="removeTodo(index)" class="small-button" label="Remove" severity="danger" size="small" aria-label="Remove" rounded />
+                                    <Button v-if="!todo.done" @click="strikeTodo(index, todo)" class="small-button" label="Done" severity="success" size="small" aria-label="Done" rounded />
+                                    <Button v-else-if="todo.done" @click="strikeTodo(index, todo)" class="small-button" label="Reopen" severity="info" size="small" aria-label="Reopen" rounded />
+                                    <Button @click="removeTodo(index, todo)" class="small-button" label="Remove" severity="danger" size="small" aria-label="Remove" rounded />
                                 </div>
                             </div>
                         </li>
@@ -285,6 +290,7 @@ watch(
 .button-group {
     display: flex;
     gap: 5px;
+    margin-left: auto;
 }
 
 .edit-input {
