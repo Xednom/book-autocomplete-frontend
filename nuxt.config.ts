@@ -75,7 +75,7 @@ export default defineNuxtConfig({
 
   // uncomment this code block once the login system is initiated
   auth: {
-    baseURL: process.env.BASE_URL || 'http://127.0.0.1:8000/',
+    baseURL: process.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/',
     provider: {
       type: 'refresh',
       endpoints: {
