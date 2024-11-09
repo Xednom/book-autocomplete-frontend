@@ -95,8 +95,8 @@ const searchBooks = (event) => {
 const addTodo = async () => {
     if (todoDescription.value.trim() && selectedBook.value) {
         const newTodo = {
-            description: todoDescription.value,
-            book: selectedBook.value.title,
+            description: todoDescription.value + " - ",
+            book: "Book: " + selectedBook.value.title,
             done: false,
             user: data.value.id
         };
