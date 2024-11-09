@@ -12,9 +12,7 @@ import { useToast } from 'primevue/usetoast';
 const dt = ref();
 const filters = ref({
     book: { value: '', matchMode: FilterMatchMode.CONTAINS },
-    description: { value: '', matchMode: FilterMatchMode.CONTAINS },
-    start_time: { value: '', matchMode: FilterMatchMode.DATE_IS },
-    duration: { value: '', matchMode: FilterMatchMode.CONTAINS }
+    description: { value: '', matchMode: FilterMatchMode.CONTAINS }
 });
 
 const { transformedData, first, rows, totalRecords, loading, fetchItems, onPageChange } = usePaginatedFetch('book-notes', filters);
@@ -66,7 +64,7 @@ const onSort = (event: any) => {
                         dataKey="id"
                         :totalRecords="totalRecords"
                         filterDisplay="row"
-                        :globalFilterFields="['book', 'description', 'start_date', 'duration']"
+                        :globalFilterFields="['book', 'description']"
                         :loading="loading"
                         @filter="onFilter"
                         @sort="onSort"
@@ -84,16 +82,6 @@ const onSort = (event: any) => {
                             </template>
                         </Column>
                         <Column field="description" header="Description" filterMatchMode="startsWith" sortable>
-                            <template #filter="{ filterModel, filterCallback }">
-                                <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" placeholder="Search" />
-                            </template>
-                        </Column>
-                        <Column field="start_time" header="Start time" filterMatchMode="contains" sortable>
-                            <template #filter="{ filterModel, filterCallback }">
-                                <Calendar v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" showIcon iconDisplay="input" showTime hourFormat="24" />
-                            </template>
-                        </Column>
-                        <Column field="duration" header="Duration" filterMatchMode="startsWith" sortable>
                             <template #filter="{ filterModel, filterCallback }">
                                 <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" placeholder="Search" />
                             </template>

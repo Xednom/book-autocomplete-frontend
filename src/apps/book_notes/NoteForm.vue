@@ -22,6 +22,7 @@ import moment from 'moment';
 const { data } = useAuth();
 const selectedBook = ref();
 const filteredBooks = ref([]);
+
 const books = ref([]);
 const toast = useToast();
 const store = useRestStore();
@@ -97,30 +98,6 @@ function bookSelected() {
         selectedBook.value = item.book;
     }
 }
-
-watch(
-    () => item.value.date_field,
-    (newVal) => {
-        item.value.date_field = formatDate(newVal);
-    },
-    { immediate: true }
-);
-
-watch(
-    () => item.value.datetime_field,
-    (newVal) => {
-        item.value.datetime_field = formatDateTime(newVal);
-    },
-    { immediate: true }
-);
-
-watch(
-    serverError,
-    (newVal) => {
-        responseError.value = newVal;
-    },
-    { immediate: true }
-);
 
 onMounted(() => {
     if (!props.create) {
