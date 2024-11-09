@@ -41,7 +41,7 @@ export default defineNuxtConfig({
   },
 
   // '@sidebase/nuxt-auth' - re-add this for activating the login system
-  modules: ['nuxt-primevue', '@pinia/nuxt',],
+  modules: ['nuxt-primevue', '@sidebase/nuxt-auth', '@pinia/nuxt',],
 
   primevue: {
     options: { ripple: true },
@@ -74,33 +74,33 @@ export default defineNuxtConfig({
   css: ['primeicons/primeicons.css', 'primeflex/primeflex.scss', 'primevue/resources/themes/lara-light-indigo/theme.css', '@/assets/styles.scss'],
 
   // uncomment this code block once the login system is initiated
-  // auth: {
-  //   baseURL: process.env.BASE_URL || 'http://127.0.0.1:8000/',
-  //   provider: {
-  //     type: 'refresh',
-  //     endpoints: {
-  //       signIn: { path: '/api/auth/jwt/create', method: 'post' },
-  //       signOut: false,
-  //       signUp: { path: 'api/auth/users', method: 'post' },
-  //       getSession: { path: 'api/auth/users/me', method: 'get' },
-  //       refresh: { path: 'api/auth/jwt/refresh', method: 'post' }
-  //     },
-  //     pages: {
-  //       login: '/auth/login'
-  //     },
-  //     token: {
-  //       signInResponseTokenPointer: '/access',
-  //       type: "Bearer",
-  //       maxAgeInSeconds: 60 * 5, // 5 min
-  //       sameSiteAttribute: 'strict'
-  //     },
-  //     refreshToken: {
-  //       signInResponseRefreshTokenPointer: '/refresh',
-  //       refreshRequestTokenPointer: "Bearer",
-  //     }
-  //   },
-  //   globalAppMiddleware: true
-  // },
+  auth: {
+    baseURL: process.env.BASE_URL || 'http://127.0.0.1:8000/',
+    provider: {
+      type: 'refresh',
+      endpoints: {
+        signIn: { path: '/api/auth/jwt/create', method: 'post' },
+        signOut: false,
+        signUp: { path: 'api/auth/users', method: 'post' },
+        getSession: { path: 'api/auth/users/me', method: 'get' },
+        refresh: { path: 'api/auth/jwt/refresh', method: 'post' }
+      },
+      pages: {
+        login: '/auth/login'
+      },
+      token: {
+        signInResponseTokenPointer: '/access',
+        type: "Bearer",
+        maxAgeInSeconds: 60 * 5, // 5 min
+        sameSiteAttribute: 'strict'
+      },
+      refreshToken: {
+        signInResponseRefreshTokenPointer: '/refresh',
+        refreshRequestTokenPointer: "Bearer",
+      }
+    },
+    globalAppMiddleware: true
+  },
 
   compatibilityDate: '2024-08-14',
 });

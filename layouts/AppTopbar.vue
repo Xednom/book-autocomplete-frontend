@@ -66,7 +66,7 @@ const isOutsideClicked = (event) => {
     return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
 };
 
-// const { data, signOut } = useAuth();
+const { data, signOut } = useAuth();
 const menu = ref();
 const items = ref([
     {
@@ -131,7 +131,7 @@ const toggle = (event) => {
             </Menu>
         </button>
 
-        <!-- <div class="layout-topbar-menu" :class="topbarMenuClasses">
+        <div class="layout-topbar-menu" :class="topbarMenuClasses">
             <Button type="button" icon="pi pi-user" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu" />
             <Menu ref="menu" id="overlay_menu" :model="items" :popup="true">
                 <template #start>
@@ -158,7 +158,7 @@ const toggle = (event) => {
                     </button>
                 </template>
             </Menu>
-        </div> -->
+        </div>
     </div>
 </template>
 

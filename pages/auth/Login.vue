@@ -7,7 +7,7 @@ const logoUrl = computed(() => {
 import { useToast } from 'primevue/usetoast';
 
 const toast = useToast();
-// const { signIn } = useAuth();
+const { signIn } = useAuth();
 
 const loading = ref<boolean>(false);
 const authError = ref<Record<string, unknown>>({});
@@ -26,34 +26,34 @@ const data = {
     password: loginData.value.password
 };
 
-// const onSubmit = () => {
-//     loading.value = true;
-//     signIn({ username: data.username, password: data.password }, { callbackUrl: '/' })
-//         .then(() => {
-//             loading.value = false;
-//         })
-//         .catch((err) => {
-//             loading.value = false;
-//             const errorMessage = err.message;
-//             const errorCodeMatch = errorMessage.match(/: (\d{3})/);
-//             const errorCode = errorCodeMatch ? errorCodeMatch[1] : null;
+const onSubmit = () => {
+    loading.value = true;
+    signIn({ username: data.username, password: data.password }, { callbackUrl: '/' })
+        .then(() => {
+            loading.value = false;
+        })
+        .catch((err) => {
+            loading.value = false;
+            const errorMessage = err.message;
+            const errorCodeMatch = errorMessage.match(/: (\d{3})/);
+            const errorCode = errorCodeMatch ? errorCodeMatch[1] : null;
 
-//             if (errorCode === '401' || errorCode === '400' || errorCode === '403' || errorCode === '405') {
-//                 authError.value = 'Authentication Failed';
-//             } else if (errorMessage.includes('no response')) {
-//                 authError.value = 'No response from server';
-//             } else {
-//                 authError.value = errorMessage;
-//             }
+            if (errorCode === '401' || errorCode === '400' || errorCode === '403' || errorCode === '405') {
+                authError.value = 'Authentication Failed';
+            } else if (errorMessage.includes('no response')) {
+                authError.value = 'No response from server';
+            } else {
+                authError.value = errorMessage;
+            }
 
-//             toast.add({
-//                 severity: 'error',
-//                 summary: 'Error',
-//                 detail: `${authError.value}`,
-//                 life: 3000
-//             });
-//         });
-// };
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: `${authError.value}`,
+                life: 3000
+            });
+        });
+};
 </script>
 
 <template>
