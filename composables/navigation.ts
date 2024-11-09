@@ -7,7 +7,7 @@ export function useNavigationMenu() {
             },
             {
                 label: 'Book Club',
-                items: [{ label: 'Book Meeting', icon: 'pi pi-fw pi-building', to: '/meeting' }]
+                items: [{ label: 'Book Meeting', icon: 'pi pi-fw pi-building', to: '/meeting' }, { label: 'Book Notes', icon: 'pi pi-fw pi-file', to: '/book-notes' }]
             },
         ]
     };
