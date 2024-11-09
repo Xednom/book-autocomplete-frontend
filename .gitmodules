@@ -1,5 +1,5 @@
 [submodule "vue-bvgels"]
-	path = vue-bvgels
+	path = src/vue-bvgels
 	url = git@github.com:Xednom/vue-bvgels.git
 [submodule ".assets/layout/styles/bvgels-theme"]
 	path = .assets/layout/styles/bvgels-theme
