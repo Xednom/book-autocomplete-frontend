@@ -72,7 +72,7 @@ const onSort = (event: any) => {
                         sortMode="multiple"
                     >
                         <Column headerStyle="width: 3rem"></Column>
-                        <template #loading> Loading demo data. Please wait. </template>
+                        <template #loading> Loading Book notes data. Please wait. </template>
                         <Column field="book" header="Book" filterMatchMode="startsWith" sortable>
                             <template #filter="{ filterModel, filterCallback }">
                                 <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" placeholder="Search" />
