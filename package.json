@@ -27,11 +27,13 @@
         "primeflex": "^3.3.1",
         "primeicons": "^6.0.1",
         "primevue": "^3.53.0",
+        "quill": "^2.0.2",
+        "quill-mention": "^6.0.2",
         "vercel-submodules": "^1.0.10"
     },
     "devDependencies": {
         "@babel/eslint-parser": "^7.25.9",
-        "@sidebase/nuxt-auth": "^0.6.7",
+        "@sidebase/nuxt-auth": "^0.6.3",
         "eslint": "^8.57.1",
         "eslint-config-prettier": "^8.10.0",
         "eslint-plugin-nuxt": "^4.0.0",

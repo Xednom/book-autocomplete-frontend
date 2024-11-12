@@ -9,6 +9,8 @@ import { useFuse } from '@vueuse/integrations/useFuse';
 import { useApiCrud } from '@/src/vue-bvgels/composables/useApiCrud';
 import { usePaginatedFetch } from '@/src/vue-bvgels/composables/usePaginatedFetch';
 
+import QuillEditor from '~/components/QuillEditor.vue';
+
 const { isDarkTheme } = useLayout();
 definePageMeta({
     middleware: 'auth'
@@ -37,6 +39,8 @@ const books = ref([]);
 
 const todoDescription = ref('');
 const selectedBook = ref();
+const content = ref('Test');
+const posting = ref(false);
 
 const lineOptions = ref(null);
 onMounted(() => {
@@ -93,20 +97,25 @@ const searchBooks = (event) => {
 
 // Add todo item when Enter is pressed
 const addTodo = async () => {
-    if (todoDescription.value.trim() && selectedBook.value) {
+    posting.value = true;
+    if (todoDescription.value.trim()) {
         const newTodo = {
-            description: todoDescription.value + " - ",
-            book: "Book: " + selectedBook.value.title,
+            description: todoDescription.value,
+            // book: 'Book: ' + selectedBook.value.title,
             done: false,
             user: data.value.id
         };
-
+        console.log('newTodo: ', newTodo);
         try {
             await save(newTodo, false);
+            posting.value = false;
             await fetchItems();
         } catch (err) {
+            posting.value = false;
             console.error('err saving todo: ', err);
         }
+    } else {
+        posting.value = false;
     }
 
     // Clear input fields after adding
@@ -209,19 +218,15 @@ watch(
     <div class="container">
         <div class="grid p-fluid">
             <div class="col-12">
-                <div class="card mb-0">
-                    <h5>Search a book</h5>
-                    <AutoComplete v-model="selectedBook" optionLabel="title" :suggestions="filteredBooks" @complete="searchBooks" class="w-full" dropdown>
-                        <template #option="slotProps">
-                            <div class="flex align-options-center">
-                                <div>{{ slotProps.option.title }} - {{ slotProps.option.author }}</div>
-                            </div>
-                        </template>
-                    </AutoComplete>
-                </div>
-                <div class="card mt-2">
-                    <h5>Enter your Todo</h5>
-                    <InputText v-model="todoDescription" placeholder="Describe your todo..." class="w-full" @keyup.enter="addTodo" />
+                <div class="card mt-5 mb-0">
+                    <client-only>
+                        <QuillEditor v-model="todoDescription" />
+                    </client-only>
+                    <!-- Align Post Button to the right -->
+                    <div class="button-container">
+                        <Button v-if="!posting" @click="addTodo()" label="Post"></Button>
+                        <Button v-else label="Posting..." disabled></Button>
+                    </div>
                 </div>
                 <div class="card mt-3">
                     <h5>To-Do List</h5>
@@ -232,7 +237,6 @@ watch(
                                     <strike>{{ todo.description }} {{ todo.book }}</strike>
                                 </span>
                                 <span v-else>{{ todo.description }} {{ todo.book }}</span>
-                                <!-- Button Group on the Right Side -->
                                 <div class="button-group">
                                     <Button v-if="!todo.done" @click="strikeTodo(index, todo)" class="small-button" label="Done" severity="success" size="small" aria-label="Done" rounded />
                                     <Button v-else-if="todo.done" @click="strikeTodo(index, todo)" class="small-button" label="Reopen" severity="info" size="small" aria-label="Reopen" rounded />
@@ -248,6 +252,12 @@ watch(
 </template>
 
 <style scoped>
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px; /* Adjust margin if needed */
+}
+
 .small-button {
     padding: 0.25rem 0.5rem; /* Adjust padding for smaller size */
     font-size: 0.8rem; /* Adjust font size if needed */
