@@ -47,7 +47,7 @@ onMounted(() => {
                     }
                 }
             },
-            placeholder: 'Type something and mention @ or #...'
+            placeholder: 'Mention a book using @ or #...'
         });
 
         // Set initial value of editor based on modelValue prop
